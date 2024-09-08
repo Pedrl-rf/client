@@ -1,11 +1,10 @@
-import React, { useState , useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Paper, Typography, TextField, Button } from '@material-ui/core';
 import useStyles from './styles';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { createPost , updatePost} from '../../actions/posts';
+import { createPost, updatePost } from '../../actions/posts';
 
-// Función para convertir un archivo a base64
 const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -14,6 +13,7 @@ const convertToBase64 = (file) => {
         reader.onerror = (error) => reject(error);
     });
 };
+
 
 const Form = ({ currentId, setCurrentId }) => {
     const dispatch = useDispatch();
@@ -35,48 +35,45 @@ const Form = ({ currentId, setCurrentId }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (currentId) {
-            dispatch(updatePost(currentId, postData));
-        } else {
-            dispatch(createPost(postData));
-        }
+        if (!validate()) return;
 
-        if (validate()) {
-            try {
-                // Convertir el archivo a base64 si existe y es un tipo válido
-                let fileBase64 = '';
-                if (postData.selectedFile && postData.selectedFile instanceof Blob) {
-                    fileBase64 = await convertToBase64(postData.selectedFile);
-                }
-
-                // Crear una copia del postData con el archivo convertido
-                const postDataToSend = { ...postData, selectedFile: fileBase64 };
-
-                const response = await axios.post('http://localhost:5000/posts', postDataToSend);
-                console.log(response.data);
-                clear();
-            } catch (error) {
-                //setServerError('No se pudo conectar con el servidor. Por favor, inténtalo de nuevo más tarde.');
-                console.error('Error al enviar los datos:', error);
+        try {
+            let fileBase64 = '';
+            if (postData.selectedFile && postData.selectedFile instanceof Blob) {
+                fileBase64 = await convertToBase64(postData.selectedFile);
             }
+
+            const postDataToSend = { ...postData, selectedFile: fileBase64 };
+            if (currentId === null) {
+                // Crear un nuevo post
+                await dispatch(createPost(postDataToSend));
+            } else {
+                // Actualizar un post existente
+                await dispatch(updatePost(currentId, postDataToSend));
+            }
+
+            clear(); // Limpia el formulario después de enviar
+        } catch (error) {
+            console.error('Error al enviar el post:', error);
+            setServerError('No se pudo conectar con el servidor. Por favor, inténtalo de nuevo más tarde.');
         }
-};
+    };
 
     const clear = () => {
+        setCurrentId(null);
         setPostData({ creator: '', title: '', site: '', tags: '', selectedFile: '' });
-        setErrors({});
-        setServerError('')
-    }
+        setServerError(''); // Limpiar el error del servidor
+    };
 
     const post = useSelector((state) => currentId ? state.posts.find((p) => p._id === currentId) : null);
     useEffect(() => {
-        if (post) setPostData(post)
-    }, [post])
+        if (post) setPostData(post);
+    }, [post]);
 
     return (
         <Paper className={classes.paper}>
             <form autoComplete="off" noValidate className={`${classes.root} ${classes.form}`} onSubmit={handleSubmit}>
-                <Typography variant="h6">Sube la fotografía</Typography>
+                <Typography variant="h6">{currentId ? 'Modifica' : 'Sube'} la fotografía</Typography>
                 <TextField 
                     name="creator" 
                     variant="outlined" 
@@ -111,17 +108,19 @@ const Form = ({ currentId, setCurrentId }) => {
                     fullWidth 
                     value={postData.tags} 
                     onChange={(e) => setPostData({ ...postData, tags: e.target.value })} 
-                    {...(errors.tags && { error: true, helperText: errors.tags })} 
+                    {...(errors.tags && { error: true, helperText: errors.tags })}
                 />
                 <div className={classes.fileInput}>
                     <input type="file" onChange={(e) => setPostData({ ...postData, selectedFile: e.target.files[0] })} />
                 </div>
                 {serverError && <Typography color="error">{serverError}</Typography>}
-                <Button className={classes.buttonSubmit} variant="contained" color="primary" size="large" type="submit" fullWidth>Subir</Button>
+                <Button className={classes.buttonSubmit} variant="contained" color="primary" size="large" type="submit" fullWidth>
+                    {currentId ? 'Modificar' : 'Subir'}
+                </Button>
                 <Button variant="contained" color="secondary" size="small" onClick={clear} fullWidth>Limpiar</Button>
             </form>
         </Paper>
     );
 };
 
-export default Form;
+export default Form
