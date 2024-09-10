@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Paper, Typography, TextField, Button } from '@material-ui/';
+import { Paper, Typography, TextField, Button } from '@material-ui';
 import useStyles from './styles';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
