@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Button, Avatar } from '@material-ui/core';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import {jwtDecode} from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode'; // Asegúrate de que esta importación sea correcta
 import useStyles from './styles';
 import ReFoto from '../../images/ReFoto.png';
 
@@ -13,9 +13,17 @@ const NavBar = () => {
   const navigate = useNavigate();
 
   const logout = () => {
+    // Despacha una acción para hacer logout en la tienda
     dispatch({ type: 'LOGOUT' });
+    // Elimina el perfil de localStorage
     localStorage.removeItem('profile');
+    // Limpia las cookies del navegador
+    document.cookie.split(';').forEach((cookie) => {
+      document.cookie = cookie.replace(/^ +/, '').replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+    });
+    // Redirige al usuario a la página principal
     navigate('/');
+    // Actualiza el estado del usuario
     setUser(null);
   };
 
@@ -54,11 +62,8 @@ const NavBar = () => {
           </div>
         ) : (
           <>
-            <Button component={Link} to="/auth" variant="contained" color="primary">
-              Regístrate
-            </Button>
             <Button component={Link} to="/login" variant="contained" color="secondary">
-              Logearse
+              Registrarse o Loggin
             </Button>
           </>
         )}
