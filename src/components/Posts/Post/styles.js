@@ -49,4 +49,12 @@ export default makeStyles({
     display: 'flex',
     justifyContent: 'space-between',
   },
+  searchBar: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '20px',
+  },
+  searchButton: {
+    marginLeft: '10px',
+  },
 });

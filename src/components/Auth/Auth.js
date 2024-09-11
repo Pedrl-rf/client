@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Avatar, Button, Paper, Grid, Typography, Container, TextField } from '@material-ui/core';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -15,13 +15,21 @@ const Auth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Verifica si el usuario ya está autenticado
+    const user = JSON.parse(localStorage.getItem('profile'));
+    if (user) {
+      navigate('/'); // Redirige a la página principal si ya está autenticado
+    }
+  }, [navigate]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (isSignup) {
-      dispatch(signup(form, navigate));
+      dispatch(signup(form, navigate)).then(() => window.location.reload());
     } else {
-      dispatch(signin(form, navigate));
+      dispatch(signin(form, navigate)).then(() => window.location.reload());
     }
   };
 

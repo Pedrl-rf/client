@@ -17,7 +17,10 @@ const NavBar = () => {
     dispatch({ type: 'LOGOUT' });
     // Elimina el perfil de localStorage
     localStorage.removeItem('profile');
-    // Limpia las cookies del navegador
+    // Elimina todos los datos del localStorage y sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
+    // Elimina todas las cookies del navegador (para tu dominio)
     document.cookie.split(';').forEach((cookie) => {
       document.cookie = cookie.replace(/^ +/, '').replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
     });
@@ -25,6 +28,8 @@ const NavBar = () => {
     navigate('/');
     // Actualiza el estado del usuario
     setUser(null);
+    // Recarga la página
+    window.location.reload();
   };
 
   useEffect(() => {
@@ -62,7 +67,7 @@ const NavBar = () => {
           </div>
         ) : (
           <>
-            <Button component={Link} to="/login" variant="contained" color="secondary">
+            <Button component={Link} to="/auth" variant="contained" color="primary">
               Registrarse o Loggin
             </Button>
           </>
